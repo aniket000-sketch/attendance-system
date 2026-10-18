@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Student Attendance Management System</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef2f6;--surface:#fff;--ink:#0f1b2d;--muted:#52607a;--line:#d3dbe6;--accent:#2f4bff;--accent-ink:#fff;--p:#1e8e5a;--a:#d64545;--l:#c98a00;--hero:#0f1b2d;--hero-ink:#eef2f6;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b1220;--surface:#121c30;--ink:#e8edf6;--muted:#9aa8c2;--line:#25324d;--accent:#7b8dff;--accent-ink:#0b1220;--p:#3cc487;--a:#ff7070;--l:#f0b429;--hero:#070c17;--hero-ink:#e8edf6}}
+:root[data-theme="dark"]{--bg:#0b1220;--surface:#121c30;--ink:#e8edf6;--muted:#9aa8c2;--line:#25324d;--accent:#7b8dff;--accent-ink:#0b1220;--p:#3cc487;--a:#ff7070;--l:#f0b429;--hero:#070c17;--hero-ink:#e8edf6}
+html{scroll-padding-top:env(safe-area-inset-top,0px);scroll-behavior:smooth}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.6 "IBM Plex Sans",system-ui,sans-serif}
+h1,h2,h3{font-family:"Bricolage Grotesque","IBM Plex Sans",sans-serif;line-height:1.1;margin:0;letter-spacing:-.02em}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;gap:20px;align-items:center;height:56px;overflow-x:auto;white-space:nowrap}
+nav b{font-family:"Bricolage Grotesque",sans-serif;font-size:18px;margin-right:auto}
+nav a{text-decoration:none;color:var(--muted);font-size:14px;font-weight:500}
+nav a:hover{color:var(--ink)}
+.hero{background:var(--hero);color:var(--hero-ink);padding:64px 0 72px}
+.hero h1{font-size:clamp(38px,7vw,72px);font-weight:800;max-width:14ch}
+.hero p.lead{max-width:56ch;color:#aebbd3;font-size:18px;margin:20px 0 0}
+.meta{display:flex;flex-wrap:wrap;gap:8px 28px;margin-top:28px;font-size:14px;color:#aebbd3}
+.meta span b{color:var(--hero-ink);font-weight:600}
+section{padding:72px 0}
+h2{font-size:clamp(28px,4vw,40px);font-weight:700;margin-bottom:12px}
+.sub{color:var(--muted);max-width:62ch;margin:0 0 32px}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:22px}
+.card h3{font-size:19px;margin-bottom:8px}
+.card p{margin:0;color:var(--muted);font-size:15px}
+/* register demo */
+.demo{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;margin-top:-40px;position:relative;color:var(--ink)}
+.demo-head{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center;margin-bottom:14px}
+.demo-head h2{font-size:22px;margin:0}
+.legend{display:flex;gap:14px;font-size:13px;color:var(--muted)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:560px}
+th,td{padding:8px 6px;text-align:center;font-size:14px;border-bottom:1px solid var(--line)}
+th{font-weight:600;color:var(--muted)}
+td:first-child,th:first-child{text-align:left;white-space:nowrap}
+td:first-child small{color:var(--muted);margin-left:6px}
+.cell{width:38px;height:34px;border:0;border-radius:6px;font:600 14px "IBM Plex Sans",sans-serif;cursor:pointer;color:#fff;transition:background .15s,transform .1s}
+.cell:active{transform:scale(.92)}
+.cell[data-s="P"]{background:var(--p)}.cell[data-s="A"]{background:var(--a)}.cell[data-s="L"]{background:var(--l)}
+.pct{font-weight:600;min-width:64px}
+.bar{display:block;height:6px;background:var(--line);border-radius:3px;margin-top:4px;overflow:hidden}
+.bar span{display:block;height:100%;background:var(--p);transition:width .25s}
+.low{color:var(--a)}.low + .bar span{background:var(--a)}
+.summary{display:flex;flex-wrap:wrap;gap:12px 32px;margin-top:16px;font-size:15px;align-items:center}
+.summary b{font-family:"Bricolage Grotesque",sans-serif;font-size:26px;margin-right:6px}
+.btn{font:500 14px "IBM Plex Sans",sans-serif;background:var(--accent);color:var(--accent-ink);border:0;border-radius:8px;padding:9px 16px;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.alert{margin-top:12px;font-size:14px;color:var(--muted);min-height:22px}
+/* process */
+.steps{list-style:none;padding:0;margin:0;display:grid;gap:0;counter-reset:s}
+.steps li{counter-increment:s;display:grid;grid-template-columns:48px 1fr;gap:16px;padding:20px 0;border-top:1px solid var(--line)}
+.steps li::before{content:counter(s);font:800 32px "Bricolage Grotesque",sans-serif;color:var(--accent)}
+.steps h3{font-size:19px;margin-bottom:4px}.steps p{margin:0;color:var(--muted)}
+/* tables */
+.tbl{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow-x:auto}
+.tbl table{min-width:520px}.tbl th,.tbl td{text-align:left;padding:12px 16px}
+code{font-family:ui-monospace,Menlo,monospace;font-size:13px;background:var(--bg);padding:2px 6px;border-radius:4px}
+.tags{display:flex;flex-wrap:wrap;gap:8px}
+.tags span{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 14px;font-size:14px}
+.roles{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.roles ul{margin:10px 0 0;padding-left:18px;color:var(--muted);font-size:15px}
+.two{display:grid;gap:32px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+footer{border-top:1px solid var(--line);padding:32px 0;color:var(--muted);font-size:14px}
+footer .wrap{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<nav><div class="wrap"><b>AttendIQ</b><a href="#features">Features</a><a href="#how">How it works</a><a href="#design">System design</a><a href="#roles">Users</a><a href="#scope">Scope</a></div></nav>
+
+<header class="hero"><div class="wrap">
+<h1>Student attendance, recorded once and trusted everywhere.</h1>
+<p class="lead">A web-based Student Attendance Management System that replaces paper registers with fast daily marking, automatic percentage tracking and instant shortage alerts for teachers, students and administrators.</p>
+<div class="meta"><span>Project: <b>Student Attendance Management System</b></span><span>Submitted by: <b>[Your name / team]</b></span><span>Guide: <b>[Guide name]</b></span><span>Institute: <b>[College name]</b></span></div>
+</div></header>
+
+<main>
+<div class="wrap">
+<div class="demo" id="demo">
+<div class="demo-head"><h2>Try the register</h2>
+<div class="legend"><span><i style="background:var(--p)"></i>Present</span><span><i style="background:var(--a)"></i>Absent</span><span><i style="background:var(--l)"></i>Late</span></div></div>
+<div class="scroll"><table id="reg" aria-label="Attendance register"></table></div>
+<div class="summary"><span><b id="avg">0%</b>class average</span><span><b id="short">0</b>below 75%</span>
+<button class="btn" id="allp">Mark all present today</button><button class="btn ghost" id="reset">Reset demo</button></div>
+<div class="alert" id="msg" role="status">Select any cell to cycle Present, Absent and Late. Percentages update instantly.</div>
+</div>
+</div>
+
+<section id="features"><div class="wrap">
+<h2>What the system does</h2>
+<p class="sub">Each feature removes a manual step from the daily attendance routine.</p>
+<div class="grid">
+<div class="card"><h3>Daily marking</h3><p>Teachers open a class list and mark Present, Absent or Late in one pass. Records are date-stamped and cannot be duplicated for the same session.</p></div>
+<div class="card"><h3>Automatic percentages</h3><p>Attendance is calculated per student, per subject and per month, so no one has to total a register by hand.</p></div>
+<div class="card"><h3>Shortage alerts</h3><p>Students who fall below the minimum (75% by default) are flagged to the teacher and shown a warning on their own dashboard.</p></div>
+<div class="card"><h3>Leave requests</h3><p>Students submit leave with a reason. Approved leave is recorded as excused and excluded from the shortage calculation.</p></div>
+<div class="card"><h3>Reports and export</h3><p>Administrators generate class, subject and defaulter reports and download them as PDF or CSV for audits.</p></div>
+<div class="card"><h3>Role-based access</h3><p>Admins, teachers and students each see only what they need. Every edit to a record is logged with who changed it and when.</p></div>
+</div></div></section>
+
+<section id="how" style="background:var(--surface);border-block:1px solid var(--line)"><div class="wrap">
+<h2>How a day of attendance flows</h2>
+<p class="sub">From the first lecture to the monthly report.</p>
+<ol class="steps">
+<li><div><h3>Teacher signs in and selects the class</h3><p>The dashboard lists today’s timetable slots for that teacher.</p></div></li>
+<li><div><h3>Attendance is marked</h3><p>The class list loads with everyone set to Present. The teacher changes only the exceptions and saves.</p></div></li>
+<li><div><h3>The system validates and stores</h3><p>Duplicate sessions are blocked, approved leave is applied, and the record is written to the database.</p></div></li>
+<li><div><h3>Percentages and alerts update</h3><p>Totals are recalculated and anyone below the threshold is flagged immediately.</p></div></li>
+<li><div><h3>Students and admins view results</h3><p>Students check their own record. Admins export reports for the department.</p></div></li>
+</ol></div></section>
+
+<section id="design"><div class="wrap">
+<h2>System design</h2>
+<p class="sub">A three-tier web application with a relational database.</p>
+<div class="two">
+<div>
+<h3 style="margin-bottom:12px">Technology stack</h3>
+<div class="tags"><span>HTML5 / CSS3</span><span>JavaScript</span><span>Python Flask or Node.js</span><span>MySQL / PostgreSQL</span><span>REST API</span><span>JWT authentication</span><span>bcrypt password hashing</span></div>
+<p class="sub" style="margin-top:16px">Replace these with the stack you actually used in your implementation.</p>
+</div>
+<div>
+<h3 style="margin-bottom:12px">Architecture</h3>
+<div class="card"><p><b style="color:var(--ink)">Presentation:</b> browser interface for teacher, student and admin.<br><b style="color:var(--ink)">Application:</b> REST API with authentication, attendance rules and report generation.<br><b style="color:var(--ink)">Data:</b> relational database holding users, classes, sessions and attendance.</p></div>
+</div></div>
+<h3 style="margin:36px 0 12px">Database tables</h3>
+<div class="tbl"><table>
+<tr><th>Table</th><th>Key fields</th><th>Purpose</th></tr>
+<tr><td><code>users</code></td><td>id, name, email, password_hash, role</td><td>Admins, teachers and students</td></tr>
+<tr><td><code>classes</code></td><td>id, name, year, section</td><td>Groups of students</td></tr>
+<tr><td><code>subjects</code></td><td>id, name, class_id, teacher_id</td><td>Subject taught to a class</td></tr>
+<tr><td><code>sessions</code></td><td>id, subject_id, date, period</td><td>One lecture or lab</td></tr>
+<tr><td><code>attendance</code></td><td>id, session_id, student_id, status</td><td>Present, Absent, Late or Excused</td></tr>
+<tr><td><code>leave_requests</code></td><td>id, student_id, from, to, reason, status</td><td>Leave applications and approval</td></tr>
+</table></div>
+</div></section>
+
+<section id="roles" style="background:var(--surface);border-block:1px solid var(--line)"><div class="wrap">
+<h2>Who uses it</h2>
+<p class="sub">Three roles with separate permissions.</p>
+<div class="roles">
+<div class="card"><h3>Administrator</h3><ul><li>Manage users, classes and subjects</li><li>Set the minimum attendance threshold</li><li>Generate and export reports</li></ul></div>
+<div class="card"><h3>Teacher</h3><ul><li>Mark and correct attendance</li><li>Approve or reject leave</li><li>See defaulters for their subjects</li></ul></div>
+<div class="card"><h3>Student</h3><ul><li>View attendance by subject and month</li><li>Apply for leave</li><li>Receive shortage warnings</li></ul></div>
+</div></div></section>
+
+<section id="scope"><div class="wrap">
+<h2>Scope and outcomes</h2>
+<div class="two" style="margin-top:20px">
+<div><h3 style="margin-bottom:10px">Problems solved</h3>
+<p class="sub" style="margin:0">Manual registers are slow to total, easy to alter and hard to audit. Proxy entries go unnoticed, and students learn about a shortage only when exams approach. This system records attendance once, calculates it automatically and warns early.</p></div>
+<div><h3 style="margin-bottom:10px">Future enhancements</h3>
+<div class="tags"><span>QR code check-in</span><span>Face recognition</span><span>SMS and email to parents</span><span>Mobile app</span><span>Analytics dashboard</span></div></div>
+</div></div></section>
+</main>
+
+<footer><div class="wrap"><span>Student Attendance Management System · Academic project</span><span>[Your name] · [Roll no.] · [Year]</span></div></footer>
+
+<script>
+(function(){
+var students=[["Aarav Patil","101"],["Diya Kulkarni","102"],["Rohan Deshmukh","103"],["Sneha Joshi","104"],["Kabir Shah","105"],["Isha Pawar","106"],["Neel Gokhale","107"],["Tara More","108"]];
+var days=["Mon","Tue","Wed","Thu","Fri","Sat"];
+var seed=["PPPPAP","PAPLAP","PPPPPP","APAPLA","PPLPPP","PPAPPA","LPPAAP","PPPPPL"];
+var KEY="attendiq-demo-v1",data;
+function load(){try{var s=localStorage.getItem(KEY);if(s){var d=JSON.parse(s);if(Array.isArray(d)&&d.length===students.length)return d}}catch(e){}return seed.map(function(r){return r.split("")})}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){}}
+data=load();
+var reg=document.getElementById("reg"),msg=document.getElementById("msg");
+function pct(row){var c=0;row.forEach(function(s){if(s!=="A")c++});return Math.round(c/row.length*100)}
+function render(){
+var h="<tr><th>Student</th>"+days.map(function(d){return"<th>"+d+"</th>"}).join("")+"<th>Attendance</th></tr>";
+var sum=0,low=0;
+students.forEach(function(st,i){
+var p=pct(data[i]);sum+=p;if(p<75)low++;
+h+="<tr><td>"+st[0]+"<small>#"+st[1]+"</small></td>";
+data[i].forEach(function(s,j){h+='<td><button class="cell" data-i="'+i+'" data-j="'+j+'" data-s="'+s+'" aria-label="'+st[0]+', '+days[j]+': '+({P:"Present",A:"Absent",L:"Late"})[s]+'">'+s+"</button></td>"});
+h+='<td class="pct"><span class="'+(p<75?"low":"")+'">'+p+'%</span><span class="bar"><span style="width:'+p+'%"></span></span></td></tr>'});
+reg.innerHTML=h;
+document.getElementById("avg").textContent=Math.round(sum/students.length)+"%";
+document.getElementById("short").textContent=low;
+return low}
+var order={P:"A",A:"L",L:"P"};
+reg.addEventListener("click",function(e){var b=e.target.closest(".cell");if(!b)return;
+var i=+b.dataset.i,j=+b.dataset.j;data[i][j]=order[data[i][j]];save();
+var low=render();var p=pct(data[i]);
+msg.textContent=p<75?students[i][0]+" is now at "+p+"%, below the 75% minimum. A shortage alert would be sent.":"Saved. "+students[i][0]+" is at "+p+"%.";
+var nb=reg.querySelector('.cell[data-i="'+i+'"][data-j="'+j+'"]');if(nb)nb.focus()});
+document.getElementById("allp").onclick=function(){data.forEach(function(r){r[r.length-1]="P"});save();render();msg.textContent="Saturday marked present for the whole class."};
+document.getElementById("reset").onclick=function(){data=seed.map(function(r){return r.split("")});save();render();msg.textContent="Demo reset to the sample register."};
+render();
+})();
+</script>
+</body>
+</html>
