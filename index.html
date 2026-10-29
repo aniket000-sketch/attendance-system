@@ -21,7 +21,7 @@
     --hero:#070c17;--hero-ink:#e8edf6;
   }
 }
-,::before,*::after{box-sizing:border-box}
+*,*::before,*::after{box-sizing:border-box}
 html{scroll-behavior:smooth;scroll-padding-top:56px}
 body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.6 "IBM Plex Sans",system-ui,-apple-system,sans-serif}
 h1,h2,h3{font-family:"Bricolage Grotesque","IBM Plex Sans",system-ui,sans-serif;line-height:1.1;margin:0;letter-spacing:-.02em}
@@ -29,21 +29,18 @@ a{color:inherit}
 :focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 .wrap{max-width:1080px;margin:0 auto;padding:0 20px}
 
-/* nav */
 nav{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
 nav .wrap{display:flex;gap:20px;align-items:center;height:56px;overflow-x:auto;white-space:nowrap}
 nav .brand{font-family:"Bricolage Grotesque",sans-serif;font-size:18px;font-weight:700;margin-right:auto}
 nav a.link{text-decoration:none;color:var(--muted);font-size:14px;font-weight:500}
 nav a.link:hover{color:var(--ink)}
 
-/* hero */
 .hero{background:var(--hero);color:var(--hero-ink);padding:64px 0 96px}
 .hero h1{font-size:clamp(36px,7vw,72px);font-weight:800;max-width:14ch}
 .hero p.lead{max-width:56ch;color:#aebbd3;font-size:18px;margin:20px 0 0}
 .meta{display:flex;flex-wrap:wrap;gap:8px 28px;margin-top:28px;font-size:14px;color:#aebbd3}
 .meta b{color:var(--hero-ink);font-weight:600}
 
-/* sections */
 section{padding:72px 0}
 .band{background:var(--surface);border-block:1px solid var(--line)}
 h2{font-size:clamp(28px,4vw,40px);font-weight:700;margin-bottom:12px}
@@ -54,7 +51,6 @@ h2{font-size:clamp(28px,4vw,40px);font-weight:700;margin-bottom:12px}
 .card p{margin:0;color:var(--muted);font-size:15px}
 .two{display:grid;gap:32px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
 
-/* register demo */
 .demo{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;margin-top:-56px;position:relative}
 .demo-head{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center;margin-bottom:14px}
 .demo-head h2{font-size:22px;margin:0}
@@ -82,14 +78,12 @@ td small{color:var(--muted);margin-left:6px}
 .btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
 .alert{margin-top:12px;font-size:14px;color:var(--muted);min-height:22px}
 
-/* steps */
 .steps{list-style:none;padding:0;margin:0;counter-reset:s}
 .steps li{counter-increment:s;display:grid;grid-template-columns:48px 1fr;gap:16px;padding:20px 0;border-top:1px solid var(--line)}
 .steps li::before{content:counter(s);font:800 32px "Bricolage Grotesque",sans-serif;color:var(--accent)}
 .steps h3{font-size:19px;margin-bottom:4px}
 .steps p{margin:0;color:var(--muted)}
 
-/* tables and tags */
 .tbl{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow-x:auto}
 .tbl table{min-width:520px}
 .tbl th,.tbl td{text-align:left;padding:12px 16px}
@@ -101,15 +95,13 @@ code{font-family:ui-monospace,Menlo,monospace;font-size:13px;background:var(--bg
 
 footer{border-top:1px solid var(--line);padding:32px 0;color:var(--muted);font-size:14px}
 footer .wrap{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between}
-
-@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
 </style>
 </head>
 <body>
 
 <nav>
   <div class="wrap">
-    <span class="brand" data-project="short">Attendance System</span>
+    <span class="brand" data-project="short">AttendIQ</span>
     <a class="link" href="#features">Features</a>
     <a class="link" href="#how">How it works</a>
     <a class="link" href="#design">System design</a>
@@ -258,7 +250,6 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between}
 (function () {
   "use strict";
 
-  /* ---- Change the project name here only ---- */
   var PROJECT = {
     full: "Student Attendance Management System",
     short: "AttendIQ"
@@ -269,7 +260,6 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between}
     el.textContent = PROJECT[el.getAttribute("data-project")];
   });
 
-  /* ---- Demo register ---- */
   var students = [
     ["Samir Hiwale", "101"], ["Rahul Jondhale", "102"], ["Sayali Jondhale", "103"],
     ["Prachi Samire Hiwale", "104"], ["Ratan Jondhale", "105"], ["Mayur Jondhale", "106"],
@@ -277,4 +267,91 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between}
   ];
   var days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   var seed = ["PPPPAP", "PAPLAP", "PPPPPP", "APAPLA", "PPLPPP", "PPAPPA", "LPPAAP", "PPPPPL"];
-  var LABEL = { P: "Present", A
+  var LABEL = { P: "Present", A: "Absent", L: "Late" };
+  var NEXT = { P: "A", A: "L", L: "P" };
+  var KEY = "attendiq-demo-v2";
+
+  function fromSeed() {
+    return seed.map(function (r) { return r.split(""); });
+  }
+
+  function load() {
+    try {
+      var saved = JSON.parse(localStorage.getItem(KEY));
+      if (Array.isArray(saved) && saved.length === students.length) return saved;
+    } catch (e) { }
+    return fromSeed();
+  }
+
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) { }
+  }
+
+  var data = load();
+  var reg = document.getElementById("reg");
+  var msg = document.getElementById("msg");
+
+  function pct(row) {
+    var attended = row.filter(function (s) { return s !== "A"; }).length;
+    return Math.round(attended / row.length * 100);
+  }
+
+  function render() {
+    var html = "<tr><th>Student</th>" +
+      days.map(function (d) { return "<th>" + d + "</th>"; }).join("") +
+      "<th>Attendance</th></tr>";
+    var sum = 0, low = 0;
+
+    students.forEach(function (st, i) {
+      var p = pct(data[i]);
+      sum += p;
+      if (p < 75) low++;
+      html += "<tr><td>" + st[0] + "<small>#" + st[1] + "</small></td>";
+      data[i].forEach(function (s, j) {
+        html += '<td><button type="button" class="cell" data-i="' + i + '" data-j="' + j +
+          '" data-s="' + s + '" aria-label="' + st[0] + ", " + days[j] + ": " + LABEL[s] + '">' +
+          s + "</button></td>";
+      });
+      html += '<td class="pct' + (p < 75 ? " low" : "") + '">' + p + '%<span class="bar"><span style="width:' +
+        p + '%"></span></span></td></tr>';
+    });
+
+    reg.innerHTML = html;
+    document.getElementById("avg").textContent = Math.round(sum / students.length) + "%";
+    document.getElementById("short").textContent = low;
+  }
+
+  reg.addEventListener("click", function (e) {
+    var btn = e.target.closest(".cell");
+    if (!btn) return;
+    var i = Number(btn.dataset.i), j = Number(btn.dataset.j);
+    data[i][j] = NEXT[data[i][j]];
+    save();
+    render();
+    var p = pct(data[i]);
+    msg.textContent = p < 75
+      ? students[i][0] + " is now at " + p + "%, below the 75% minimum. A shortage alert would be sent."
+      : "Saved. " + students[i][0] + " is at " + p + "%.";
+    var again = reg.querySelector('.cell[data-i="' + i + '"][data-j="' + j + '"]');
+    if (again) again.focus();
+  });
+
+  document.getElementById("allp").addEventListener("click", function () {
+    data.forEach(function (r) { r[r.length - 1] = "P"; });
+    save();
+    render();
+    msg.textContent = "Saturday marked present for the whole class.";
+  });
+
+  document.getElementById("reset").addEventListener("click", function () {
+    data = fromSeed();
+    save();
+    render();
+    msg.textContent = "Demo reset to the sample register.";
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
