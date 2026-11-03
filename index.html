@@ -1,357 +1,459 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Student Attendance Management System</title>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-:root{
-  --bg:#eef2f6;--surface:#fff;--ink:#0f1b2d;--muted:#52607a;--line:#d3dbe6;
-  --accent:#2f4bff;--accent-ink:#fff;--p:#1e8e5a;--a:#d64545;--l:#c98a00;
-  --hero:#0f1b2d;--hero-ink:#eef2f6;
-  box-sizing:border-box;
-  padding-top:env(safe-area-inset-top,0px);
-  padding-bottom:env(safe-area-inset-bottom,0px);
-}
-@media (prefers-color-scheme:dark){
-  :root:not([data-theme="light"]){
-    --bg:#0b1220;--surface:#121c30;--ink:#e8edf6;--muted:#9aa8c2;--line:#25324d;
-    --accent:#7b8dff;--accent-ink:#0b1220;--p:#3cc487;--a:#ff7070;--l:#f0b429;
-    --hero:#070c17;--hero-ink:#e8edf6;
-  }
-}
-*,*::before,*::after{box-sizing:border-box}
-html{scroll-behavior:smooth;scroll-padding-top:56px}
-body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.6 "IBM Plex Sans",system-ui,-apple-system,sans-serif}
-h1,h2,h3{font-family:"Bricolage Grotesque","IBM Plex Sans",system-ui,sans-serif;line-height:1.1;margin:0;letter-spacing:-.02em}
-a{color:inherit}
-:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
-.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0f1b2d">
+  <meta name="description" content="A student attendance management system demo with attendance tracking, percentage summaries, and shortage alerts.">
+  <title>Student Attendance Management System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #eef2f6;
+      --surface: #fff;
+      --ink: #0f1b2d;
+      --muted: #52607a;
+      --line: #d3dbe6;
+      --accent: #2f4bff;
+      --accent-ink: #fff;
+      --present: #1e8e5a;
+      --absent: #d64545;
+      --late: #a56d00;
+      --hero: #0f1b2d;
+      --hero-ink: #eef2f6;
+      font-family: "IBM Plex Sans", system-ui, -apple-system, sans-serif;
+      box-sizing: border-box;
+    }
 
-nav{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
-nav .wrap{display:flex;gap:20px;align-items:center;height:56px;overflow-x:auto;white-space:nowrap}
-nav .brand{font-family:"Bricolage Grotesque",sans-serif;font-size:18px;font-weight:700;margin-right:auto}
-nav a.link{text-decoration:none;color:var(--muted);font-size:14px;font-weight:500}
-nav a.link:hover{color:var(--ink)}
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #0b1220;
+        --surface: #121c30;
+        --ink: #e8edf6;
+        --muted: #9aa8c2;
+        --line: #25324d;
+        --accent: #7b8dff;
+        --accent-ink: #0b1220;
+        --present: #3cc487;
+        --absent: #ff7070;
+        --late: #f0b429;
+        --hero: #070c17;
+        --hero-ink: #e8edf6;
+      }
+    }
 
-.hero{background:var(--hero);color:var(--hero-ink);padding:64px 0 96px}
-.hero h1{font-size:clamp(36px,7vw,72px);font-weight:800;max-width:14ch}
-.hero p.lead{max-width:56ch;color:#aebbd3;font-size:18px;margin:20px 0 0}
-.meta{display:flex;flex-wrap:wrap;gap:8px 28px;margin-top:28px;font-size:14px;color:#aebbd3}
-.meta b{color:var(--hero-ink);font-weight:600}
+    *,
+    *::before,
+    *::after { box-sizing: inherit; }
 
-section{padding:72px 0}
-.band{background:var(--surface);border-block:1px solid var(--line)}
-h2{font-size:clamp(28px,4vw,40px);font-weight:700;margin-bottom:12px}
-.sub{color:var(--muted);max-width:62ch;margin:0 0 32px}
-.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:22px}
-.card h3{font-size:19px;margin-bottom:8px}
-.card p{margin:0;color:var(--muted);font-size:15px}
-.two{display:grid;gap:32px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+    html { scroll-behavior: smooth; scroll-padding-top: 64px; }
+    body {
+      margin: 0;
+      padding-top: env(safe-area-inset-top, 0px);
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+      background: var(--bg);
+      color: var(--ink);
+      font-size: 16px;
+      line-height: 1.6;
+    }
 
-.demo{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;margin-top:-56px;position:relative}
-.demo-head{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center;margin-bottom:14px}
-.demo-head h2{font-size:22px;margin:0}
-.legend{display:flex;gap:14px;font-size:13px;color:var(--muted)}
-.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
-.scroll{overflow-x:auto}
-table{border-collapse:collapse;width:100%;min-width:560px}
-th,td{padding:8px 6px;text-align:center;font-size:14px;border-bottom:1px solid var(--line)}
-th{font-weight:600;color:var(--muted)}
-td:first-child,th:first-child{text-align:left;white-space:nowrap}
-td small{color:var(--muted);margin-left:6px}
-.cell{width:38px;height:34px;border:0;border-radius:6px;font:600 14px "IBM Plex Sans",sans-serif;cursor:pointer;color:#fff;transition:background .15s,transform .1s}
-.cell:active{transform:scale(.92)}
-.cell[data-s="P"]{background:var(--p)}
-.cell[data-s="A"]{background:var(--a)}
-.cell[data-s="L"]{background:var(--l)}
-.pct{font-weight:600;min-width:72px}
-.bar{display:block;height:6px;background:var(--line);border-radius:3px;margin-top:4px;overflow:hidden}
-.bar span{display:block;height:100%;background:var(--p);transition:width .25s}
-.pct.low{color:var(--a)}
-.pct.low .bar span{background:var(--a)}
-.summary{display:flex;flex-wrap:wrap;gap:12px 32px;margin-top:16px;font-size:15px;align-items:center}
-.summary b{font-family:"Bricolage Grotesque",sans-serif;font-size:26px;margin-right:6px}
-.btn{font:500 14px "IBM Plex Sans",sans-serif;background:var(--accent);color:var(--accent-ink);border:0;border-radius:8px;padding:9px 16px;cursor:pointer}
-.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
-.alert{margin-top:12px;font-size:14px;color:var(--muted);min-height:22px}
+    h1, h2, h3 {
+      margin: 0;
+      font-family: "Bricolage Grotesque", "IBM Plex Sans", system-ui, sans-serif;
+      line-height: 1.1;
+      letter-spacing: -.02em;
+    }
+    a { color: inherit; }
+    :focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+    .wrap { width: min(1080px, 100%); margin-inline: auto; padding-inline: 20px; }
 
-.steps{list-style:none;padding:0;margin:0;counter-reset:s}
-.steps li{counter-increment:s;display:grid;grid-template-columns:48px 1fr;gap:16px;padding:20px 0;border-top:1px solid var(--line)}
-.steps li::before{content:counter(s);font:800 32px "Bricolage Grotesque",sans-serif;color:var(--accent)}
-.steps h3{font-size:19px;margin-bottom:4px}
-.steps p{margin:0;color:var(--muted)}
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      background: var(--bg);
+      border-bottom: 1px solid var(--line);
+    }
+    nav .wrap {
+      display: flex;
+      min-height: 56px;
+      align-items: center;
+      gap: 20px;
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+    .brand {
+      margin-right: auto;
+      font-family: "Bricolage Grotesque", sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      text-decoration: none;
+    }
+    nav a.link { color: var(--muted); font-size: 14px; font-weight: 500; text-decoration: none; }
+    nav a.link:hover { color: var(--ink); }
 
-.tbl{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow-x:auto}
-.tbl table{min-width:520px}
-.tbl th,.tbl td{text-align:left;padding:12px 16px}
-code{font-family:ui-monospace,Menlo,monospace;font-size:13px;background:var(--bg);padding:2px 6px;border-radius:4px}
-.tags{display:flex;flex-wrap:wrap;gap:8px}
-.tags span{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 14px;font-size:14px}
-.roles{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
-.roles ul{margin:10px 0 0;padding-left:18px;color:var(--muted);font-size:15px}
+    .hero { padding: 64px 0 96px; background: var(--hero); color: var(--hero-ink); }
+    .hero h1 { max-width: 14ch; font-size: clamp(36px, 7vw, 72px); font-weight: 800; }
+    .hero .lead { max-width: 56ch; margin: 20px 0 0; color: #aebbd3; font-size: 18px; }
+    .meta { display: flex; flex-wrap: wrap; gap: 8px 28px; margin-top: 28px; color: #aebbd3; font-size: 14px; }
+    .meta b { color: var(--hero-ink); font-weight: 600; }
 
-footer{border-top:1px solid var(--line);padding:32px 0;color:var(--muted);font-size:14px}
-footer .wrap{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between}
-</style>
+    section { padding: 72px 0; }
+    .band { border-block: 1px solid var(--line); background: var(--surface); }
+    h2 { margin-bottom: 12px; font-size: clamp(28px, 4vw, 40px); font-weight: 700; }
+    .sub { max-width: 62ch; margin: 0 0 32px; color: var(--muted); }
+    .grid, .roles { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 16px; }
+    .roles { grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); }
+    .card { padding: 22px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+    .card h3 { margin-bottom: 8px; font-size: 19px; }
+    .card p { margin: 0; color: var(--muted); font-size: 15px; }
+    .two { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 32px; }
+
+    .demo { position: relative; margin-top: -56px; padding: 20px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+    .demo-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+    .demo-head h2 { margin: 0; font-size: 22px; }
+    .legend { display: flex; flex-wrap: wrap; gap: 14px; color: var(--muted); font-size: 13px; }
+    .legend i { display: inline-block; width: 12px; height: 12px; margin-right: 5px; border-radius: 3px; vertical-align: -1px; }
+    .scroll, .tbl { overflow-x: auto; }
+    table { width: 100%; min-width: 560px; border-collapse: collapse; }
+    th, td { padding: 8px 6px; border-bottom: 1px solid var(--line); font-size: 14px; text-align: center; }
+    th { color: var(--muted); font-weight: 600; }
+    td:first-child, th:first-child { text-align: left; white-space: nowrap; }
+    td small { margin-left: 6px; color: var(--muted); }
+    .cell {
+      width: 38px;
+      height: 34px;
+      border: 0;
+      border-radius: 6px;
+      color: #fff;
+      font: 600 14px "IBM Plex Sans", sans-serif;
+      cursor: pointer;
+      transition: transform .1s;
+    }
+    .cell:active { transform: scale(.92); }
+    .cell[data-s="P"] { background: var(--present); }
+    .cell[data-s="A"] { background: var(--absent); }
+    .cell[data-s="L"] { background: var(--late); }
+    .pct { min-width: 72px; font-weight: 600; }
+    .bar { display: block; height: 6px; margin-top: 4px; overflow: hidden; border-radius: 3px; background: var(--line); }
+    .bar span { display: block; height: 100%; background: var(--present); transition: width .25s; }
+    .pct.low { color: var(--absent); }
+    .pct.low .bar span { background: var(--absent); }
+    .summary { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; margin-top: 16px; font-size: 15px; }
+    .summary b { margin-right: 6px; font-family: "Bricolage Grotesque", sans-serif; font-size: 26px; }
+    .btn { padding: 9px 16px; border: 0; border-radius: 8px; background: var(--accent); color: var(--accent-ink); font: 500 14px "IBM Plex Sans", sans-serif; cursor: pointer; }
+    .btn.ghost { border: 1px solid var(--line); background: transparent; color: var(--ink); }
+    .alert { min-height: 22px; margin-top: 12px; color: var(--muted); font-size: 14px; }
+
+    .steps { margin: 0; padding: 0; list-style: none; counter-reset: step; }
+    .steps li { display: grid; grid-template-columns: 48px 1fr; gap: 16px; padding: 20px 0; border-top: 1px solid var(--line); counter-increment: step; }
+    .steps li::before { color: var(--accent); content: counter(step); font: 800 32px "Bricolage Grotesque", sans-serif; }
+    .steps h3 { margin-bottom: 4px; font-size: 19px; }
+    .steps p { margin: 0; color: var(--muted); }
+    .tbl { border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+    .tbl table { min-width: 520px; }
+    .tbl th, .tbl td { padding: 12px 16px; text-align: left; }
+    code { padding: 2px 6px; border-radius: 4px; background: var(--bg); font-family: ui-monospace, Menlo, monospace; font-size: 13px; }
+    .tags { display: flex; flex-wrap: wrap; gap: 8px; }
+    .tags span { padding: 6px 14px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); font-size: 14px; }
+    .roles ul { margin: 10px 0 0; padding-left: 18px; color: var(--muted); font-size: 15px; }
+    footer { padding: 32px 0; border-top: 1px solid var(--line); color: var(--muted); font-size: 14px; }
+    footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; }
+
+    @media (max-width: 600px) {
+      .hero { padding: 48px 0 80px; }
+      section { padding: 56px 0; }
+      .demo { padding: 16px; }
+      nav .wrap { gap: 16px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
+    }
+  </style>
 </head>
 <body>
-
-<nav>
-  <div class="wrap">
-    <span class="brand" data-project="short">AttendIQ</span>
-    <a class="link" href="#features">Features</a>
-    <a class="link" href="#how">How it works</a>
-    <a class="link" href="#design">System design</a>
-    <a class="link" href="#roles">Users</a>
-    <a class="link" href="#scope">Scope</a>
-  </div>
-</nav>
-
-<header class="hero">
-  <div class="wrap">
-    <h1>Student attendance, recorded once and trusted everywhere.</h1>
-    <p class="lead">A web-based Student Attendance Management System that replaces paper registers with fast daily marking, automatic percentage tracking and instant shortage alerts for teachers, students and administrators.</p>
-    <div class="meta">
-      <span>Project: <b data-project="full">Student Attendance Management System</b></span>
-      <span>Submitted by: <b>Aniket Raibhole, Ravina Doddi, Swaraj Laghule, Buddhabhushan Bhalerao</b></span>
-      <span>Guide: <b>Dr. S. V. Reddy</b></span>
-      <span>Institute: <b>Suman Ramesh Tulsiani Technical Campus, Faculty of Engineering</b></span>
-    </div>
-  </div>
-</header>
-
-<main>
-  <div class="wrap">
-    <div class="demo" id="demo">
-      <div class="demo-head">
-        <h2>Try the register</h2>
-        <div class="legend">
-          <span><i style="background:var(--p)"></i>Present</span>
-          <span><i style="background:var(--a)"></i>Absent</span>
-          <span><i style="background:var(--l)"></i>Late</span>
-        </div>
-      </div>
-      <div class="scroll"><table id="reg" aria-label="Attendance register"></table></div>
-      <div class="summary">
-        <span><b id="avg">0%</b>class average</span>
-        <span><b id="short">0</b>below 75%</span>
-        <button class="btn" id="allp" type="button">Mark Saturday present</button>
-        <button class="btn ghost" id="reset" type="button">Reset demo</button>
-      </div>
-      <div class="alert" id="msg" role="status">Tap any cell to cycle Present, Absent and Late. Percentages update instantly.</div>
-    </div>
-  </div>
-
-  <section id="features">
+  <nav aria-label="Main navigation">
     <div class="wrap">
-      <h2>What the system does</h2>
-      <p class="sub">Each feature removes a manual step from the daily attendance routine.</p>
-      <div class="grid">
-        <div class="card"><h3>Daily marking</h3><p>Teachers open a class list and mark Present, Absent or Late in one pass. Records are date-stamped and cannot be duplicated for the same session.</p></div>
-        <div class="card"><h3>Automatic percentages</h3><p>Attendance is calculated per student, per subject and per month, so no one has to total a register by hand.</p></div>
-        <div class="card"><h3>Shortage alerts</h3><p>Students below the minimum (75% by default) are flagged to the teacher and see a warning on their own dashboard.</p></div>
-        <div class="card"><h3>Leave requests</h3><p>Students submit leave with a reason. Approved leave is recorded as excused and excluded from the shortage calculation.</p></div>
-        <div class="card"><h3>Reports and export</h3><p>Administrators generate class, subject and defaulter reports and download them as PDF or CSV for audits.</p></div>
-        <div class="card"><h3>Role-based access</h3><p>Admins, teachers and students each see only what they need. Every edit to a record is logged with who changed it and when.</p></div>
+      <a class="brand" href="#top" data-project="short">AttendIQ</a>
+      <a class="link" href="#features">Features</a>
+      <a class="link" href="#how">How it works</a>
+      <a class="link" href="#design">System design</a>
+      <a class="link" href="#roles">Users</a>
+      <a class="link" href="#scope">Scope</a>
+    </div>
+  </nav>
+
+  <header class="hero" id="top">
+    <div class="wrap">
+      <h1>Student attendance, recorded once and trusted everywhere.</h1>
+      <p class="lead">A web-based Student Attendance Management System that replaces paper registers with fast daily marking, automatic percentage tracking, and instant shortage alerts for teachers, students, and administrators.</p>
+      <div class="meta">
+        <span>Project: <b data-project="full">Student Attendance Management System</b></span>
+        <span>Submitted by: <b>Aniket Raibhole, Ravina Doddi, Swaraj Laghule, Buddhabhushan Bhalerao</b></span>
+        <span>Guide: <b>Dr. S. V. Reddy</b></span>
+        <span>Institute: <b>Suman Ramesh Tulsiani Technical Campus, Faculty of Engineering</b></span>
       </div>
     </div>
-  </section>
+  </header>
 
-  <section id="how" class="band">
+  <main>
     <div class="wrap">
-      <h2>How a day of attendance flows</h2>
-      <p class="sub">From the first lecture to the monthly report.</p>
-      <ol class="steps">
-        <li><div><h3>Teacher signs in and selects the class</h3><p>The dashboard lists today's timetable slots for that teacher.</p></div></li>
-        <li><div><h3>Attendance is marked</h3><p>The class list loads with everyone set to Present. The teacher changes only the exceptions and saves.</p></div></li>
-        <li><div><h3>The system validates and stores</h3><p>Duplicate sessions are blocked, approved leave is applied, and the record is written to the database.</p></div></li>
-        <li><div><h3>Percentages and alerts update</h3><p>Totals are recalculated and anyone below the threshold is flagged immediately.</p></div></li>
-        <li><div><h3>Students and admins view results</h3><p>Students check their own record. Admins export reports for the department.</p></div></li>
-      </ol>
-    </div>
-  </section>
-
-  <section id="design">
-    <div class="wrap">
-      <h2>System design</h2>
-      <p class="sub">A three-tier web application with a relational database.</p>
-      <div class="two">
-        <div>
-          <h3 style="margin-bottom:12px">Technology stack</h3>
-          <div class="tags">
-            <span>HTML5 / CSS3</span><span>JavaScript</span><span>Python Flask or Node.js</span>
-            <span>MySQL / PostgreSQL</span><span>REST API</span><span>JWT authentication</span><span>bcrypt password hashing</span>
+      <section class="demo" id="demo" aria-labelledby="demo-title">
+        <div class="demo-head">
+          <h2 id="demo-title">Try the register</h2>
+          <div class="legend" aria-label="Attendance status legend">
+            <span><i style="background:var(--present)"></i>Present</span>
+            <span><i style="background:var(--absent)"></i>Absent</span>
+            <span><i style="background:var(--late)"></i>Late</span>
           </div>
         </div>
-        <div>
-          <h3 style="margin-bottom:12px">Architecture</h3>
-          <div class="card">
-            <p><b style="color:var(--ink)">Presentation:</b> browser interface for teacher, student and admin.<br>
-            <b style="color:var(--ink)">Application:</b> REST API with authentication, attendance rules and report generation.<br>
-            <b style="color:var(--ink)">Data:</b> relational database holding users, classes, sessions and attendance.</p>
+        <div class="scroll"><table id="reg" aria-label="Interactive attendance register"></table></div>
+        <div class="summary">
+          <span><b id="avg">0%</b>class average</span>
+          <span><b id="short">0</b>below 75%</span>
+          <button class="btn" id="allp" type="button">Mark Saturday present</button>
+          <button class="btn ghost" id="reset" type="button">Reset demo</button>
+        </div>
+        <div class="alert" id="msg" role="status" aria-live="polite">Select a cell to cycle through Present, Absent, and Late. Percentages update instantly.</div>
+      </section>
+    </div>
+
+    <section id="features">
+      <div class="wrap">
+        <h2>What the system does</h2>
+        <p class="sub">Each feature removes a manual step from the daily attendance routine.</p>
+        <div class="grid">
+          <article class="card"><h3>Daily marking</h3><p>Teachers open a class list and mark Present, Absent, or Late in one pass. Records are date-stamped, and duplicate sessions are prevented.</p></article>
+          <article class="card"><h3>Automatic percentages</h3><p>Attendance is calculated per student, per subject, and per month, so no one has to total a register by hand.</p></article>
+          <article class="card"><h3>Shortage alerts</h3><p>Students below the minimum (75% by default) are flagged to the teacher and see a warning on their dashboard.</p></article>
+          <article class="card"><h3>Leave requests</h3><p>Students submit leave with a reason. Approved leave is recorded as excused and excluded from the shortage calculation.</p></article>
+          <article class="card"><h3>Reports and export</h3><p>Administrators generate class, subject, and defaulter reports and download them as PDF or CSV for audits.</p></article>
+          <article class="card"><h3>Role-based access</h3><p>Admins, teachers, and students each see what they need. Edits are logged with who changed a record and when.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="how" class="band">
+      <div class="wrap">
+        <h2>How a day of attendance flows</h2>
+        <p class="sub">From the first lecture to the monthly report.</p>
+        <ol class="steps">
+          <li><div><h3>Teacher signs in and selects the class</h3><p>The dashboard lists today's timetable slots for that teacher.</p></div></li>
+          <li><div><h3>Attendance is marked</h3><p>The class list loads with everyone set to Present. The teacher changes only the exceptions and saves.</p></div></li>
+          <li><div><h3>The system validates and stores</h3><p>Duplicate sessions are blocked, approved leave is applied, and the record is written to the database.</p></div></li>
+          <li><div><h3>Percentages and alerts update</h3><p>Totals are recalculated and anyone below the threshold is flagged immediately.</p></div></li>
+          <li><div><h3>Students and admins view results</h3><p>Students check their own record. Admins export reports for the department.</p></div></li>
+        </ol>
+      </div>
+    </section>
+
+    <section id="design">
+      <div class="wrap">
+        <h2>System design</h2>
+        <p class="sub">A three-tier web application with a relational database.</p>
+        <div class="two">
+          <div>
+            <h3 style="margin-bottom:12px">Technology stack</h3>
+            <div class="tags">
+              <span>HTML5 / CSS3</span><span>JavaScript</span><span>Python Flask or Node.js</span>
+              <span>MySQL / PostgreSQL</span><span>REST API</span><span>JWT authentication</span><span>bcrypt password hashing</span>
+            </div>
+          </div>
+          <div>
+            <h3 style="margin-bottom:12px">Architecture</h3>
+            <div class="card">
+              <p><b style="color:var(--ink)">Presentation:</b> browser interface for teacher, student, and admin.<br>
+              <b style="color:var(--ink)">Application:</b> REST API with authentication, attendance rules, and report generation.<br>
+              <b style="color:var(--ink)">Data:</b> relational database holding users, classes, sessions, and attendance.</p>
+            </div>
+          </div>
+        </div>
+        <h3 style="margin:36px 0 12px">Database tables</h3>
+        <div class="tbl">
+          <table>
+            <thead><tr><th>Table</th><th>Key fields</th><th>Purpose</th></tr></thead>
+            <tbody>
+              <tr><td><code>users</code></td><td>id, name, email, password_hash, role</td><td>Admins, teachers, and students</td></tr>
+              <tr><td><code>classes</code></td><td>id, name, year, section</td><td>Groups of students</td></tr>
+              <tr><td><code>subjects</code></td><td>id, name, class_id, teacher_id</td><td>Subject taught to a class</td></tr>
+              <tr><td><code>sessions</code></td><td>id, subject_id, date, period</td><td>One lecture or lab</td></tr>
+              <tr><td><code>attendance</code></td><td>id, session_id, student_id, status</td><td>Present, Absent, Late, or Excused</td></tr>
+              <tr><td><code>leave_requests</code></td><td>id, student_id, from, to, reason, status</td><td>Leave applications and approval</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="roles" class="band">
+      <div class="wrap">
+        <h2>Who uses it</h2>
+        <p class="sub">Three roles with separate permissions.</p>
+        <div class="roles">
+          <article class="card"><h3>Administrator</h3><ul><li>Manage users, classes, and subjects</li><li>Set the minimum attendance threshold</li><li>Generate and export reports</li></ul></article>
+          <article class="card"><h3>Teacher</h3><ul><li>Mark and correct attendance</li><li>Approve or reject leave</li><li>See defaulters for their subjects</li></ul></article>
+          <article class="card"><h3>Student</h3><ul><li>View attendance by subject and month</li><li>Apply for leave</li><li>Receive shortage warnings</li></ul></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="scope">
+      <div class="wrap">
+        <h2>Scope and outcomes</h2>
+        <div class="two" style="margin-top:20px">
+          <div>
+            <h3 style="margin-bottom:10px">Problems solved</h3>
+            <p class="sub" style="margin:0">Manual registers are slow to total, easy to alter, and hard to audit. This system makes attendance easier to track and helps students learn about shortages early.</p>
+          </div>
+          <div>
+            <h3 style="margin-bottom:10px">Future enhancements</h3>
+            <div class="tags"><span>QR code check-in</span><span>Face recognition</span><span>SMS and email to parents</span><span>Mobile app</span><span>Analytics dashboard</span></div>
           </div>
         </div>
       </div>
-      <h3 style="margin:36px 0 12px">Database tables</h3>
-      <div class="tbl">
-        <table>
-          <tr><th>Table</th><th>Key fields</th><th>Purpose</th></tr>
-          <tr><td><code>users</code></td><td>id, name, email, password_hash, role</td><td>Admins, teachers and students</td></tr>
-          <tr><td><code>classes</code></td><td>id, name, year, section</td><td>Groups of students</td></tr>
-          <tr><td><code>subjects</code></td><td>id, name, class_id, teacher_id</td><td>Subject taught to a class</td></tr>
-          <tr><td><code>sessions</code></td><td>id, subject_id, date, period</td><td>One lecture or lab</td></tr>
-          <tr><td><code>attendance</code></td><td>id, session_id, student_id, status</td><td>Present, Absent, Late or Excused</td></tr>
-          <tr><td><code>leave_requests</code></td><td>id, student_id, from, to, reason, status</td><td>Leave applications and approval</td></tr>
-        </table>
-      </div>
-    </div>
-  </section>
+    </section>
+  </main>
 
-  <section id="roles" class="band">
+  <footer>
     <div class="wrap">
-      <h2>Who uses it</h2>
-      <p class="sub">Three roles with separate permissions.</p>
-      <div class="roles">
-        <div class="card"><h3>Administrator</h3><ul><li>Manage users, classes and subjects</li><li>Set the minimum attendance threshold</li><li>Generate and export reports</li></ul></div>
-        <div class="card"><h3>Teacher</h3><ul><li>Mark and correct attendance</li><li>Approve or reject leave</li><li>See defaulters for their subjects</li></ul></div>
-        <div class="card"><h3>Student</h3><ul><li>View attendance by subject and month</li><li>Apply for leave</li><li>Receive shortage warnings</li></ul></div>
-      </div>
+      <span data-project="full">Student Attendance Management System</span>
+      <span>Aniket Raibhole, Ravina Doddi, Swaraj Laghule, Buddhabhushan Bhalerao · 2nd Year</span>
     </div>
-  </section>
+  </footer>
 
-  <section id="scope">
-    <div class="wrap">
-      <h2>Scope and outcomes</h2>
-      <div class="two" style="margin-top:20px">
-        <div>
-          <h3 style="margin-bottom:10px">Problems solved</h3>
-          <p class="sub" style="margin:0">Manual registers are slow to total, easy to alter and hard to audit. Proxy entries go unnoticed, and students learn about a shortage only when exams approach. This system records attendance once, calculates it automatically and warns early.</p>
-        </div>
-        <div>
-          <h3 style="margin-bottom:10px">Future enhancements</h3>
-          <div class="tags"><span>QR code check-in</span><span>Face recognition</span><span>SMS and email to parents</span><span>Mobile app</span><span>Analytics dashboard</span></div>
-        </div>
-      </div>
-    </div>
-  </section>
-</main>
+  <script>
+    "use strict";
 
-<footer>
-  <div class="wrap">
-    <span data-project="full">Student Attendance Management System</span>
-    <span>Aniket Raibhole, Ravina Doddi, Swaraj Laghule, Buddhabhushan Bhalerao · 2nd Year</span>
-  </div>
-</footer>
+    (() => {
+      const project = {
+        full: "Student Attendance Management System",
+        short: "AttendIQ"
+      };
+      const students = [
+        ["Samir Hiwale", "101"],
+        ["Rahul Jondhale", "102"],
+        ["Sayali Jondhale", "103"],
+        ["Prachi Samire Hiwale", "104"],
+        ["Ratan Jondhale", "105"],
+        ["Mayur Jondhale", "106"],
+        ["Sejal Shah", "107"],
+        ["Tinkyaaa Jondhale", "108"],
+        ["Swali Molke", "302"]
+      ];
+      const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+      // Keep one sample row per student (six entries per week).
+      const seed = [
+        "PPPPAP", "PAPLAP", "PPPPPP", "APAPLA", "PPLPPP",
+        "PPAPPA", "LPPAAP", "PPPPPL", "PAPPPP"
+      ];
+      const labels = { P: "Present", A: "Absent", L: "Late" };
+      const nextStatus = { P: "A", A: "L", L: "P" };
+      const storageKey = "attendiq-demo-v3";
+      const register = document.getElementById("reg");
+      const message = document.getElementById("msg");
+      const average = document.getElementById("avg");
+      const shortageCount = document.getElementById("short");
 
-<script>
-(function () {
-  "use strict";
-
-  var PROJECT = {
-    full: "Student Attendance Management System",
-    short: "AttendIQ"
-  };
-
-  document.title = PROJECT.full;
-  document.querySelectorAll("[data-project]").forEach(function (el) {
-    el.textContent = PROJECT[el.getAttribute("data-project")];
-  });
-
-  var students = [
-    ["Samir Hiwale", "101"], ["Rahul Jondhale", "102"], ["Sayali Jondhale", "103"],
-    ["Prachi Samire Hiwale", "104"], ["Ratan Jondhale", "105"], ["Mayur Jondhale", "106"],
-    ["Sejal Shah", "107"], ["Tinkyaaa Jondhale", "108"], ["Swali Molke", "302"]
-  ];
-  var days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  var seed = ["PPPPAP", "PAPLAP", "PPPPPP", "APAPLA", "PPLPPP", "PPAPPA", "LPPAAP", "PPPPPL"];
-  var LABEL = { P: "Present", A: "Absent", L: "Late" };
-  var NEXT = { P: "A", A: "L", L: "P" };
-  var KEY = "attendiq-demo-v2";
-
-  function fromSeed() {
-    return seed.map(function (r) { return r.split(""); });
-  }
-
-  function load() {
-    try {
-      var saved = JSON.parse(localStorage.getItem(KEY));
-      if (Array.isArray(saved) && saved.length === students.length) return saved;
-    } catch (e) { }
-    return fromSeed();
-  }
-
-  function save() {
-    try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) { }
-  }
-
-  var data = load();
-  var reg = document.getElementById("reg");
-  var msg = document.getElementById("msg");
-
-  function pct(row) {
-    var attended = row.filter(function (s) { return s !== "A"; }).length;
-    return Math.round(attended / row.length * 100);
-  }
-
-  function render() {
-    var html = "<tr><th>Student</th>" +
-      days.map(function (d) { return "<th>" + d + "</th>"; }).join("") +
-      "<th>Attendance</th></tr>";
-    var sum = 0, low = 0;
-
-    students.forEach(function (st, i) {
-      var p = pct(data[i]);
-      sum += p;
-      if (p < 75) low++;
-      html += "<tr><td>" + st[0] + "<small>#" + st[1] + "</small></td>";
-      data[i].forEach(function (s, j) {
-        html += '<td><button type="button" class="cell" data-i="' + i + '" data-j="' + j +
-          '" data-s="' + s + '" aria-label="' + st[0] + ", " + days[j] + ": " + LABEL[s] + '">' +
-          s + "</button></td>";
+      document.title = project.full;
+      document.querySelectorAll("[data-project]").forEach((element) => {
+        element.textContent = project[element.dataset.project] || project.full;
       });
-      html += '<td class="pct' + (p < 75 ? " low" : "") + '">' + p + '%<span class="bar"><span style="width:' +
-        p + '%"></span></span></td></tr>';
-    });
 
-    reg.innerHTML = html;
-    document.getElementById("avg").textContent = Math.round(sum / students.length) + "%";
-    document.getElementById("short").textContent = low;
-  }
+      const fromSeed = () => seed.map((row) => row.split(""));
+      const isValidData = (value) => Array.isArray(value)
+        && value.length === students.length
+        && value.every((row) => Array.isArray(row)
+          && row.length === days.length
+          && row.every((status) => Object.hasOwn(labels, status)));
 
-  reg.addEventListener("click", function (e) {
-    var btn = e.target.closest(".cell");
-    if (!btn) return;
-    var i = Number(btn.dataset.i), j = Number(btn.dataset.j);
-    data[i][j] = NEXT[data[i][j]];
-    save();
-    render();
-    var p = pct(data[i]);
-    msg.textContent = p < 75
-      ? students[i][0] + " is now at " + p + "%, below the 75% minimum. A shortage alert would be sent."
-      : "Saved. " + students[i][0] + " is at " + p + "%.";
-    var again = reg.querySelector('.cell[data-i="' + i + '"][data-j="' + j + '"]');
-    if (again) again.focus();
-  });
+      function loadData() {
+        try {
+          const saved = JSON.parse(localStorage.getItem(storageKey));
+          if (isValidData(saved)) return saved;
+        } catch (error) {
+          // Storage may be unavailable or contain invalid JSON; use the sample data.
+        }
+        return fromSeed();
+      }
 
-  document.getElementById("allp").addEventListener("click", function () {
-    data.forEach(function (r) { r[r.length - 1] = "P"; });
-    save();
-    render();
-    msg.textContent = "Saturday marked present for the whole class.";
-  });
+      let data = loadData();
 
-  document.getElementById("reset").addEventListener("click", function () {
-    data = fromSeed();
-    save();
-    render();
-    msg.textContent = "Demo reset to the sample register.";
-  });
+      function saveData() {
+        try {
+          localStorage.setItem(storageKey, JSON.stringify(data));
+        } catch (error) {
+          message.textContent = "Changes apply for this visit, but browser storage is unavailable.";
+        }
+      }
 
-  render();
-})();
-</script>
+      function attendancePercent(row) {
+        const attended = row.filter((status) => status !== "A").length;
+        return Math.round((attended / row.length) * 100);
+      }
+
+      function render() {
+        let total = 0;
+        let belowThreshold = 0;
+        const header = `<thead><tr><th scope="col">Student</th>${days.map((day) => `<th scope="col">${day}</th>`).join("")}<th scope="col">Attendance</th></tr></thead>`;
+        const rows = students.map(([name, id], studentIndex) => {
+          const row = data[studentIndex];
+          const percent = attendancePercent(row);
+          total += percent;
+          if (percent < 75) belowThreshold += 1;
+
+          const cells = row.map((status, dayIndex) => `
+            <td><button type="button" class="cell" data-i="${studentIndex}" data-j="${dayIndex}"
+              data-s="${status}" aria-label="${name}, ${days[dayIndex]}: ${labels[status]}">${status}</button></td>`).join("");
+          return `<tr><th scope="row">${name}<small>#${id}</small></th>${cells}
+            <td class="pct${percent < 75 ? " low" : ""}">${percent}%
+              <span class="bar" aria-hidden="true"><span style="width:${percent}%"></span></span>
+            </td></tr>`;
+        }).join("");
+
+        register.innerHTML = `${header}<tbody>${rows}</tbody>`;
+        average.textContent = `${Math.round(total / students.length)}%`;
+        shortageCount.textContent = String(belowThreshold);
+      }
+
+      register.addEventListener("click", (event) => {
+        const button = event.target.closest(".cell");
+        if (!button) return;
+
+        const studentIndex = Number(button.dataset.i);
+        const dayIndex = Number(button.dataset.j);
+        const currentStatus = data[studentIndex]?.[dayIndex];
+        if (!Object.hasOwn(nextStatus, currentStatus)) return;
+
+        data[studentIndex][dayIndex] = nextStatus[currentStatus];
+        saveData();
+        render();
+
+        const percent = attendancePercent(data[studentIndex]);
+        message.textContent = percent < 75
+          ? `${students[studentIndex][0]} is now at ${percent}%, below the 75% minimum. A shortage alert would be sent.`
+          : `Saved. ${students[studentIndex][0]} is at ${percent}%.`;
+        register.querySelector(`.cell[data-i="${studentIndex}"][data-j="${dayIndex}"]`)?.focus();
+      });
+
+      document.getElementById("allp").addEventListener("click", () => {
+        data.forEach((row) => { row[days.length - 1] = "P"; });
+        saveData();
+        render();
+        message.textContent = "Saturday marked present for the whole class.";
+      });
+
+      document.getElementById("reset").addEventListener("click", () => {
+        data = fromSeed();
+        saveData();
+        render();
+        message.textContent = "Demo reset to the sample register.";
+      });
+
+      render();
+    })();
+  </script>
 </body>
 </html>
