@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101b2d">
+  <meta name="description" content="A standalone, offline-capable student attendance register.">
+  <title>AttendIQ — Attendance Register</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f3f5f9;
+      --surface: #fff;
+      --ink: #172238;
+      --muted: #64728a;
+      --border: #dfe5ee;
+      --primary: #354cff;
+      --present: #16875a;
+      --absent: #d54b55;
+      --late: #ad7600;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0c1422;
+        --surface: #141f31;
+        --ink: #edf2fb;
+        --muted: #a0aec4;
+        --border: #29364b;
+        --primary: #8492ff;
+        --present: #41c48b;
+        --absent: #ff7b83;
+        --late: #f0bf50;
+      }
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; background: var(--bg); color: var(--ink); }
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    :focus-visible { outline: 3px solid var(--primary); outline-offset: 3px; }
+    .container { width: min(1120px, calc(100% - 32px)); margin: 0 auto; }
+    header { padding: 17px 0; border-bottom: 1px solid var(--border); background: var(--surface); }
+    .brand { font-size: 21px; font-weight: 800; }
+    main { padding: 32px 0 46px; }
+    .heading { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 12px; margin-bottom: 22px; }
+    h1, h2 { margin: 0; letter-spacing: -.025em; }
+    h1 { font-size: clamp(28px, 5vw, 40px); }
+    h2 { font-size: 20px; }
+    .subtitle, .date, .hint { color: var(--muted); }
+    .subtitle { margin: 7px 0 0; }
+    .date { font-size: 14px; }
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 18px; }
+    .stat, .panel { padding: 18px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); }
+    .stat-label { color: var(--muted); font-size: 12px; font-weight: 700; }
+    .stat-value { display: block; margin-top: 6px; font-size: 28px; font-weight: 750; }
+    .layout { display: grid; grid-template-columns: 280px minmax(0, 1fr); align-items: start; gap: 18px; }
+    .panel h2 { margin-bottom: 8px; }
+    .hint { margin: 0 0 15px; font-size: 13px; }
+    label { display: block; margin: 12px 0 5px; font-size: 13px; font-weight: 700; }
+    input { width: 100%; min-height: 42px; padding: 9px 11px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--ink); }
+    button { min-height: 38px; padding: 8px 12px; border: 0; border-radius: 8px; background: var(--primary); color: #fff; font-size: 13px; font-weight: 700; }
+    button:hover { filter: brightness(.94); }
+    button.secondary { border: 1px solid var(--border); background: transparent; color: var(--ink); }
+    button.danger { color: var(--absent); }
+    .add-button { width: 100%; margin-top: 14px; }
+    .error { min-height: 18px; margin: 8px 0 0; color: var(--absent); font-size: 12px; }
+    .register-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+    .legend { display: flex; flex-wrap: wrap; gap: 12px; color: var(--muted); font-size: 12px; }
+    .legend span { display: flex; align-items: center; gap: 5px; }
+    .dot { width: 9px; height: 9px; border-radius: 50%; }
+    .dot.present { background: var(--present); }
+    .dot.absent { background: var(--absent); }
+    .dot.late { background: var(--late); }
+    .table-scroll { overflow-x: auto; }
+    table { width: 100%; min-width: 700px; border-collapse: collapse; }
+    th, td { padding: 9px 7px; border-bottom: 1px solid var(--border); text-align: center; font-size: 13px; }
+    th { color: var(--muted); font-size: 12px; }
+    th:first-child, td:first-child { text-align: left; }
+    .student-name { display: block; font-weight: 700; }
+    .roll-number { color: var(--muted); font-size: 11px; }
+    .student-actions { display: flex; align-items: center; gap: 5px; }
+    .student-actions .name { min-width: 100px; margin-right: auto; }
+    .student-actions button { min-height: 30px; padding: 5px 8px; font-size: 11px; }
+    .status-button { width: 34px; min-height: 32px; padding: 4px; color: #fff; }
+    .status-button[data-status="P"] { background: var(--present); }
+    .status-button[data-status="A"] { background: var(--absent); }
+    .status-button[data-status="L"] { background: var(--late); }
+    .rate { min-width: 55px; font-weight: 700; }
+    .rate.low { color: var(--absent); }
+    .toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 9px; margin-top: 14px; }
+    .toolbar-note { margin-left: auto; color: var(--muted); font-size: 12px; }
+    .empty { padding: 24px; color: var(--muted); text-align: center !important; }
+    .notice { margin-top: 16px; padding: 11px 13px; border: 1px solid var(--border); border-radius: 9px; color: var(--muted); font-size: 12px; }
+    footer { padding: 0 0 24px; color: var(--muted); font-size: 12px; text-align: center; }
+    @media (max-width: 800px) { .layout { grid-template-columns: 1fr; } }
+    @media (max-width: 560px) {
+      .stats { gap: 8px; }
+      .stat { padding: 13px 10px; }
+      .stat-label { font-size: 10px; }
+      .stat-value { font-size: 23px; }
+      .panel { padding: 14px; }
+      .toolbar-note { width: 100%; margin-left: 0; }
+    }
+    @media print {
+      header, .add-panel, .toolbar, footer, .notice, .student-actions button { display: none !important; }
+      body { background: #fff; color: #000; }
+      .container { width: 100%; }
+      main { padding: 0; }
+      .layout { display: block; }
+      .panel, .stat { box-shadow: none; }
+      .stats { margin-bottom: 8px; }
+      .table-scroll { overflow: visible; }
+      table { min-width: 0; }
+      th, td { padding: 5px 3px; font-size: 10px; }
+    }
+  </style>
+</head>
+<body>
+  <header><div class="container brand">AttendIQ</div></header>
+  <main class="container">
+    <div class="heading">
+      <div>
+        <h1>Attendance register</h1>
+        <p class="subtitle">Manage students and record their weekly attendance.</p>
+      </div>
+      <div class="date" id="today"></div>
+    </div>
+
+    <section class="stats" aria-label="Attendance summary">
+      <article class="stat"><span class="stat-label">TOTAL STUDENTS</span><strong class="stat-value" id="student-count">0</strong></article>
+      <article class="stat"><span class="stat-label">CLASS AVERAGE</span><strong class="stat-value" id="class-average">0%</strong></article>
+      <article class="stat"><span class="stat-label">BELOW 75%</span><strong class="stat-value" id="shortage-count">0</strong></article>
+    </section>
+
+    <div class="layout">
+      <aside class="panel add-panel">
+        <h2>Add a student</h2>
+        <p class="hint">Add a name and a unique roll number.</p>
+        <form id="add-form">
+          <label for="student-name">Student name</label>
+          <input id="student-name" maxlength="60" placeholder="e.g. Asha Patil" required>
+          <label for="roll-number">Roll number</label>
+          <input id="roll-number" maxlength="20" placeholder="e.g. 109" required>
+          <p class="error" id="form-error" role="alert"></p>
+          <button class="add-button" type="submit">＋ Add student</button>
+        </form>
+        <p class="hint" style="margin-top:14px">This standalone page stores changes in this browser on this device.</p>
+      </aside>
+
+      <section class="panel">
+        <div class="register-heading">
+          <h2>Weekly register</h2>
+          <div class="legend" aria-label="Attendance status legend">
+            <span><i class="dot present"></i>Present</span>
+            <span><i class="dot absent"></i>Absent</span>
+            <span><i class="dot late"></i>Late</span>
+          </div>
+        </div>
+        <div class="table-scroll">
+          <table aria-label="Student attendance register">
+            <thead id="table-head"></thead>
+            <tbody id="table-body"></tbody>
+          </table>
+        </div>
+        <div class="toolbar">
+          <button id="saturday-button" type="button">Mark Saturday present</button>
+          <button class="secondary" id="export-button" type="button">Export CSV</button>
+          <button class="secondary" id="print-button" type="button">Print</button>
+          <button class="secondary" id="reset-button" type="button">Reset sample data</button>
+          <span class="toolbar-note">Click a status to cycle P → A → L.</span>
+        </div>
+      </section>
+    </div>
+
+    <p class="notice">Offline single-file demo. No server, database, external fonts, or internet connection is required. Data stays in this browser; export CSV for a backup.</p>
+  </main>
+  <footer class="container">AttendIQ · Standalone attendance demo</footer>
+
+  <script>
+    "use strict";
+
+    const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    const STORAGE_KEY = "attendiq-standalone-v1";
+    const SAMPLE_STUDENTS = [
+      { name: "Samir Hiwale", id: "101", attendance: "PPPPAP" },
+      { name: "Rahul Jondhale", id: "102", attendance: "PAPLAP" },
+      { name: "Sayali Jondhale", id: "103", attendance: "PPPPPP" },
+      { name: "Prachi Samire Hiwale", id: "104", attendance: "APAPLA" },
+      { name: "Ratan Jondhale", id: "105", attendance: "PPLPPP" },
+      { name: "Mayur Jondhale", id: "106", attendance: "PPAPPA" },
+      { name: "Sejal Shah", id: "107", attendance: "LPPAAP" },
+      { name: "Tinkyaaa Jondhale", id: "108", attendance: "PPPPPL" },
+      { name: "Swali Molke", id: "302", attendance: "PAPPPP" }
+    ];
+    const STATUS_LABELS = { P: "Present", A: "Absent", L: "Late" };
+    const NEXT_STATUS = { P: "A", A: "L", L: "P" };
+    const tableBody = document.getElementById("table-body");
+    const nameInput = document.getElementById("student-name");
+    const idInput = document.getElementById("roll-number");
+    const formError = document.getElementById("form-error");
+
+    document.getElementById("today").textContent = new Intl.DateTimeFormat(undefined, {
+      weekday: "long", month: "long", day: "numeric", year: "numeric"
+    }).format(new Date());
+
+    document.getElementById("table-head").innerHTML =
+      `<tr><th scope="col">Student</th>${DAYS.map(day => `<th scope="col">${day}</th>`).join("")}<th scope="col">Rate</th></tr>`;
+
+    function cloneSamples() {
+      return SAMPLE_STUDENTS.map(student => ({ ...student }));
+    }
+
+    function isValidStudentList(value) {
+      return Array.isArray(value) && value.every(student =>
+        student && typeof student.name === "string" && student.name.trim() !== "" &&
+        typeof student.id === "string" && student.id.trim() !== "" &&
+        typeof student.attendance === "string" && student.attendance.length === DAYS.length &&
+        [...student.attendance].every(status => Object.hasOwn(STATUS_LABELS, status))
+      );
+    }
+
+    function loadStudents() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        if (isValidStudentList(saved)) return saved;
+      } catch (error) {
+        // Storage can be disabled by browser privacy settings; the page still works in memory.
+      }
+      return cloneSamples();
+    }
+
+    let students = loadStudents();
+
+    function saveStudents() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(students));
+      } catch (error) {
+        // Keep the current changes in memory if this browser blocks local storage.
+      }
+    }
+
+    function attendanceRate(student) {
+      const attended = [...student.attendance].filter(status => status !== "A").length;
+      return student.attendance.length ? Math.round(attended / student.attendance.length * 100) : 0;
+    }
+
+    function actionButton(text, className, label, action) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = className;
+      button.textContent = text;
+      button.setAttribute("aria-label", label);
+      button.addEventListener("click", action);
+      return button;
+    }
+
+    function render() {
+      tableBody.replaceChildren();
+      let totalRate = 0;
+      let belowThreshold = 0;
+
+      students.forEach((student, studentIndex) => {
+        const rate = attendanceRate(student);
+        totalRate += rate;
+        if (rate < 75) belowThreshold += 1;
+
+        const row = document.createElement("tr");
+        const identityCell = document.createElement("td");
+        const actions = document.createElement("div");
+        actions.className = "student-actions";
+
+        const nameWrap = document.createElement("div");
+        nameWrap.className = "name";
+        const studentName = document.createElement("span");
+        studentName.className = "student-name";
+        studentName.textContent = student.name;
+        const rollNumber = document.createElement("span");
+        rollNumber.className = "roll-number";
+        rollNumber.textContent = `#${student.id}`;
+        nameWrap.append(studentName, rollNumber);
+        actions.append(nameWrap);
+        actions.append(actionButton("Rename", "secondary", `Rename ${student.name}`, () => renameStudent(studentIndex)));
+        actions.append(actionButton("Remove", "secondary danger", `Remove ${student.name}`, () => removeStudent(studentIndex)));
+        identityCell.append(actions);
+        row.append(identityCell);
+
+        [...student.attendance].forEach((status, dayIndex) => {
+          const cell = document.createElement("td");
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "status-button";
+          button.dataset.status = status;
+          button.textContent = status;
+          button.title = `${student.name}, ${DAYS[dayIndex]}: ${STATUS_LABELS[status]}. Click to change.`;
+          button.setAttribute("aria-label", button.title);
+          button.addEventListener("click", () => updateAttendance(studentIndex, dayIndex));
+          cell.append(button);
+          row.append(cell);
+        });
+
+        const rateCell = document.createElement("td");
+        rateCell.className = `rate${rate < 75 ? " low" : ""}`;
+        rateCell.textContent = `${rate}%`;
+        row.append(rateCell);
+        tableBody.append(row);
+      });
+
+      if (students.length === 0) {
+        const row = document.createElement("tr");
+        const cell = document.createElement("td");
+        cell.colSpan = DAYS.length + 2;
+        cell.className = "empty";
+        cell.textContent = "No students yet. Add one using the form.";
+        row.append(cell);
+        tableBody.append(row);
+      }
+
+      document.getElementById("student-count").textContent = String(students.length);
+      document.getElementById("class-average").textContent = students.length
+        ? `${Math.round(totalRate / students.length)}%` : "0%";
+      document.getElementById("shortage-count").textContent = String(belowThreshold);
+    }
+
+    function updateAttendance(studentIndex, dayIndex) {
+      const attendance = [...students[studentIndex].attendance];
+      attendance[dayIndex] = NEXT_STATUS[attendance[dayIndex]];
+      students[studentIndex].attendance = attendance.join("");
+      saveStudents();
+      render();
+    }
+
+    function renameStudent(studentIndex) {
+      const student = students[studentIndex];
+      const answer = window.prompt("Enter the student's new name:", student.name);
+      if (answer === null) return;
+      const name = answer.trim().replace(/\s+/g, " ");
+      if (name.length < 2) {
+        window.alert("Please enter a name with at least 2 characters.");
+        return;
+      }
+      student.name = name;
+      saveStudents();
+      render();
+    }
+
+    function removeStudent(studentIndex) {
+      const student = students[studentIndex];
+      if (!window.confirm(`Remove ${student.name} (#${student.id}) from the register?`)) return;
+      students.splice(studentIndex, 1);
+      saveStudents();
+      render();
+    }
+
+    document.getElementById("add-form").addEventListener("submit", event => {
+      event.preventDefault();
+      formError.textContent = "";
+      const name = nameInput.value.trim().replace(/\s+/g, " ");
+      const id = idInput.value.trim();
+
+      if (name.length < 2) {
+        formError.textContent = "Enter a name with at least 2 characters.";
+        nameInput.focus();
+        return;
+      }
+      if (!id) {
+        formError.textContent = "Enter a roll number.";
+        idInput.focus();
+        return;
+      }
+      if (students.some(student => student.id.toLowerCase() === id.toLowerCase())) {
+        formError.textContent = "That roll number is already in the register.";
+        idInput.focus();
+        return;
+      }
+
+      students.push({ name, id, attendance: "P".repeat(DAYS.length) });
+      saveStudents();
+      render();
+      event.target.reset();
+      nameInput.focus();
+    });
+
+    document.getElementById("saturday-button").addEventListener("click", () => {
+      students = students.map(student => ({
+        ...student,
+        attendance: `${student.attendance.slice(0, -1)}P`
+      }));
+      saveStudents();
+      render();
+    });
+
+    document.getElementById("reset-button").addEventListener("click", () => {
+      if (!window.confirm("Reset all changes and restore the sample students?")) return;
+      students = cloneSamples();
+      saveStudents();
+      render();
+    });
+
+    document.getElementById("print-button").addEventListener("click", () => window.print());
+
+    document.getElementById("export-button").addEventListener("click", () => {
+      const escapeCsv = value => `"${String(value).replace(/"/g, '""')}"`;
+      const rows = [["Roll number", "Student name", ...DAYS, "Attendance rate"]];
+      students.forEach(student => {
+        rows.push([student.id, student.name, ...student.attendance, `${attendanceRate(student)}%`]);
+      });
+      const csv = rows.map(row => row.map(escapeCsv).join(",")).join("\r\n");
+      const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "attendiq-attendance.csv";
+      document.body.append(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    });
+
+    render();
+  </script>
+</body>
+</html>
